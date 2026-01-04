@@ -1,8 +1,31 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, MapPin, ArrowRight, Linkedin } from "lucide-react";
+import { 
+  Mail, 
+  MapPin, 
+  ArrowRight, 
+  Linkedin,
+  X, 
+  Loader2, 
+  CheckCircle,
+  Download 
+} from "lucide-react";
+import emailjs from '@emailjs/browser';
 
 const Contact = () => {
+  // --- STATE MANAGEMENT (Same as Hero.tsx) ---
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: "", phone: "", email: "" });
+  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+
+  // --- CONFIGURATION ---
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzHjH2AIZideRQ4f7bT65Ce7qp-afw-y9j1tiSgyIitEQoxVHn92VOkPtQvE0P0pBHtSw/exec"; 
+  const SERVICE_ID = "service_h6jo09u";
+  const TEMPLATE_ID_USER = "template_zevh3p9"; // Sent to User
+  const TEMPLATE_ID_ADMIN = "template_grgdzm5"; // Sent to You
+  const PUBLIC_KEY = "Ac12uGMQtjEwdgt1n"; 
+
   const contactOptions = [
     {
       icon: Mail,
@@ -24,8 +47,65 @@ const Contact = () => {
     }
   ];
 
+  // --- HANDLERS (Same as Hero.tsx) ---
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const downloadPdf = () => {
+    const link = document.createElement('a');
+    link.href = '/STPL_Brochure.pdf'; 
+    link.download = 'Sabuj_Tech_Brochure.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("loading");
+
+    const templateParams = {
+      user_name: formData.name,
+      user_phone: formData.phone,
+      user_email: formData.email,
+    };
+
+    try {
+      // 1. Send to Google Sheet
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      // 2. Send Emails
+      await emailjs.send(SERVICE_ID, TEMPLATE_ID_USER, templateParams, PUBLIC_KEY);
+      await emailjs.send(SERVICE_ID, TEMPLATE_ID_ADMIN, templateParams, PUBLIC_KEY);
+      
+      // 3. Trigger Download
+      downloadPdf();
+      setStatus("success");
+      
+      // 4. Reset
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setStatus("idle");
+        setFormData({ name: "", phone: "", email: "" });
+      }, 3000);
+      
+    } catch (error) {
+      console.error("Operation failed:", error);
+      downloadPdf(); // Fallback download
+      alert("Request processed, but there was a connection issue logging details.");
+      setStatus("idle");
+    }
+  };
+
   return (
-    <section className="section-padding bg-card">
+    <section className="section-padding bg-card relative">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
@@ -110,11 +190,16 @@ const Contact = () => {
                   Schedule a Consultation
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
-                <a href="/STPL_Brochure.pdf" download style={{ width: '100%', display: 'block' }}>
-                  <Button variant="outline" size="lg" className="w-full text-lg">
-                    Download Technical Brochure
-                  </Button>
-                </a>
+                
+                {/* Updated Button triggers Modal instead of direct download */}
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="w-full text-lg"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  Download Technical Brochure
+                </Button>
               </div>
 
               {/* Key Benefits */}
@@ -132,6 +217,94 @@ const Contact = () => {
           </div>
         </div>
       </div>
+
+      {/* --- POPUP FORM (Identical to Hero.tsx) --- */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md relative overflow-hidden">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="p-8">
+              {status === "success" ? (
+                <div className="text-center py-8 space-y-4">
+                  <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800">Downloading...</h3>
+                  <p className="text-gray-600">
+                    Your brochure should start downloading automatically. Check your email for a copy!
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Download className="w-5 h-5 text-green-600" />
+                    <h2 className="text-2xl font-bold">Download Brochure</h2>
+                  </div>
+                  <p className="text-gray-600 mb-6 text-sm">
+                    Please share your details to receive the full technical specification document.
+                  </p>
+
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Name */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                      <input
+                        type="text" name="name" required
+                        value={formData.name} onChange={handleInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                        placeholder="Dr. Rakesh Sharma"
+                      />
+                    </div>
+
+                    {/* Phone */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                      <input
+                        type="tel" name="phone" required
+                        value={formData.phone} onChange={handleInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                        placeholder="+91 98765 43210"
+                      />
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                      <input
+                        type="email" name="email" required
+                        value={formData.email} onChange={handleInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                        placeholder="rakesh@iitkgp.ac.in"
+                      />
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-hero-gradient mt-2" 
+                      disabled={status === "loading"}
+                    >
+                      {status === "loading" ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
+                      ) : (
+                        "Download Now"
+                      )}
+                    </Button>
+                  </form>
+                </>
+              )}
+            </div>
+            <div className="bg-gray-50 px-8 py-4 border-t text-xs text-center text-gray-500">
+              Sabuj Tech respects your privacy.
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
