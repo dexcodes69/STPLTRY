@@ -10,7 +10,6 @@ const Team = () => {
       expertise: "Research and Product Development Venture | Technology Transfer | Intellectual Property Portfolio Management",
       background: "Environmental Science and Engineering",
       image: "/PAT.png",
-      linkedin: "wwe.linkedin.com"
     },
     {
       name: "Dr. Jayanta Bhattacharya",
@@ -18,7 +17,6 @@ const Team = () => {
       expertise: "Green Materials | Industrial Ecology",
       background: "Ex-Professor, Department Mining Engineering and School of Environmental Science & Engineering, IIT Kharagpur",
       image: "/JB.png",
-      linkedin: "wwe.linkedin.com"
     },
     {
       name: "Dr. Bidus Kanti Das",
@@ -26,15 +24,13 @@ const Team = () => {
       expertise: "Industrial Manufacturing | Marketing Strategist",
       background: "Sustainable Technology Development",
       image: "/BKD.png",
-      linkedin: "wwe.linkedin.com"
     },
     {
       name: "Dr. Chandra Sekhar Tiwari",
       role: "Technical Advisor",
-      expertise: "Advanced Materials | Strategic Development & Innovation",
+      expertise: "Advanced Materials | Strategic Development & Innovation",
       background: "Assistant Professor Grade I, Department of Metallurgical & Materials Engineering, IIT Kharagpur",
       image: "/CST.png",
-      linkedin: "wwe.linkedin.com"
     }
   ];
 
@@ -79,18 +75,15 @@ const Team = () => {
         {/* Team Members */}
         <div className="grid md:grid-cols-2 gap-8">
           {teamMembers.map((member, index) => (
-            <a
+            <div
               key={index}
-              href={member.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block transition-transform hover:scale-105"
+              className="block transition-transform hover:scale-[1.02]"
             >
-                <Card className="card-hover border-primary/20 cursor-pointer hover:shadow-lg transition-shadow">
+                <Card className="card-hover border-primary/20 hover:shadow-lg transition-shadow h-full">
                   <CardContent className="p-6">
                     <div className="flex items-start space-x-4">
                       {/* Avatar Image */}
-                      <div className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-primary/10">
+                      <div className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-primary/10 border border-primary/20">
                         <img
                           src={member.image}
                           alt={member.name}
@@ -122,7 +115,7 @@ const Team = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </a>
+            </div>
           ))}
         </div>
 

@@ -31,7 +31,15 @@ const Hero = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 1. Function to Trigger PDF Download
+  // 1. Function to handle Smooth Scroll to Technology Section
+  const scrollToTechnology = () => {
+    const element = document.getElementById('technology');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // 2. Function to Trigger PDF Download
   const downloadPdf = () => {
     const link = document.createElement('a');
     link.href = '/STPL_Brochure.pdf'; // Ensure file is in 'public' folder
@@ -41,7 +49,7 @@ const Hero = () => {
     document.body.removeChild(link);
   };
 
-  // 2. Main Submission Handler
+  // 3. Main Submission Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
@@ -113,7 +121,11 @@ const Hero = () => {
 
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-hero-gradient text-lg">
+              <Button 
+                size="lg" 
+                className="bg-hero-gradient text-lg"
+                onClick={scrollToTechnology}
+              >
                 Explore Our Technology <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <Button 
@@ -124,9 +136,20 @@ const Hero = () => {
               </Button>
             </div>
             
-            {/* Stats (Existing code...) */}
+            {/* Stats */}
             <div className="grid grid-cols-3 gap-8 pt-8 border-t border-border">
-               {/* ... stats code ... */}
+              <div>
+                <div className="text-3xl font-bold text-primary">50%</div>
+                <div className="text-sm text-muted-foreground">Cost Reduction</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-primary">143×</div>
+                <div className="text-sm text-muted-foreground">Stronger Shield</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-primary">3+</div>
+                <div className="text-sm text-muted-foreground">Patents Filed</div>
+              </div>
             </div>
           </div>
 
